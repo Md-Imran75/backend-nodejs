@@ -19,6 +19,7 @@ export type User = {
     fullName: string;
     email: string;
     password: string;
+    phone: string;
     avater?: string;
     balance?: number;
     role?: Role;

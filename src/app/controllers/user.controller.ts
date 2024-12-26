@@ -8,9 +8,9 @@ import validator from 'validator';
 
 export const registerUser = asyncHandle(async (req, res, _next) => {
 
-const {userName, fullName, email, password} = req.body;
+const {userName, fullName, email, password, phone} = req.body;
 
-if(!userName || !fullName || !email || !password){
+if(!userName || !fullName || !email || !password || !phone){
     throw new ApiError(400, "Please fill all the required fields");
 }
 
@@ -19,26 +19,31 @@ if (!validator.isEmail(email)) {
 }
 
 
-const existingUser = await UserModel.findOne({$or: [{userName}, {email}]});
+const existingUser = await UserModel.findOne({$or: [{userName}, {email}, {phone}]});
 
 if(existingUser){
-    throw new ApiError(409, "User already exists");
+    throw new ApiError(409, "User already exists with this username or email or phone");
 }
 if(userName.Length < 3){
-    throw new ApiError(400, "Username must be at Least 3 character Long");
+    throw new ApiError(500, "Username must be at Least 3 character Long");
 }
 if(userName.Length > 20){
-    throw new ApiError(400, "Username must be at Most 20 character Long");
+    throw new ApiError(500, "Username must be at Most 20 character Long");
 }
 if(password.Length < 8){
-    throw new ApiError(400, "Password must be at Least 8 character Long");
+    throw new ApiError(500, "Password must be at Least 8 character Long");
+}
+if(phone.Length < 11 || phone.Length > 11){
+    throw new ApiError(500, "Phone number must be 11 character Long");
 }
 
+const newPhone = "+88" + phone;
 
 const user = await UserModel.create({
     userName : userName.toLowerCase(),
     fullName,
     email: email.toLowerCase(),
+    phone : newPhone,
     password,
 
 })

@@ -41,6 +41,16 @@ const UserSchema = new mongoose.Schema({
     default: "https://www.gravatar.com/avatar"
    },
 
+   phone: {
+    type: String,
+    required: true,
+    unique: true,
+    trim: true,
+    minLength: 14,
+    maxLength: 14,
+    index: true,
+   },
+
    balance: {
     type: Number,
     default: 0,
@@ -83,8 +93,6 @@ UserSchema.methods.getSignedToken = function(){
         _id: this._id,
         userName: this.userName,
         email: this.email,
-        fullName: this.fullName,
-        balance: this.balance,
         role: this.role
     },
     process.env.ACCESS_TOKEN_SECRET as string,
