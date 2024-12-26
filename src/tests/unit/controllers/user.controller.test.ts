@@ -93,7 +93,7 @@ describe("User controller", () => {
         }
     });
 
-    test("should return 400 if trying to create a user with invalid length of password and userName", async () => {
+    test("should return 500 if trying to create a user with invalid length of password and userName", async () => {
         const existingUser = {
             userName: "ah", //invalid username length
             fullName: "Ahmed Tanjir",
@@ -137,7 +137,7 @@ describe("User controller", () => {
 
     });
 
-    test("should return 400 if trying to create a user with invalid Length of phone", async () => {
+    test("should return 500 if trying to create a user with invalid Length of phone", async () => {
         const existingUser3 = {
             userName: "ahmedtanjirkhw",
             fullName: "Ahmed Tanjir",
