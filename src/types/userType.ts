@@ -1,3 +1,4 @@
+import { ObjectId } from "mongoose";
 
 enum Role{
     user = "User",
@@ -14,7 +15,7 @@ enum Status{
 }
 
 export type User = {
-    _id?: number | string;
+    _id?: number | string | ObjectId;
     userName: string;
     fullName: string;
     email: string;
@@ -27,4 +28,20 @@ export type User = {
     refreshToken?: string;
     createdAt?: Date;
     updatedAt?: Date;
+}
+
+export interface DecodedToken {
+    _id: ObjectId;
+    iat?: number;
+    exp?: number;
+}
+
+export type fetchUserQueryParameters = {
+   page: number | string;
+   limit: number;
+   query?: string;
+   role?: Role;
+   status?: Status;
+   sortBy?: keyof User;
+   sortDirection?: 'asc' | 'desc';
 }
