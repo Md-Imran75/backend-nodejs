@@ -1,11 +1,11 @@
 import { NextFunction, Request, Response } from "express";
-import { ApiError } from "../utils/ApiError";
-import { asyncHandle } from "../utils/asyncHandler";
+import { ApiError } from "../../../utils/ApiError";
+import { asyncHandle } from "../../../utils/asyncHandler";
 import validator from 'validator';
-import AdminModel from "@src/models/admin.mode";
-import { generateAccessTokenAndRefreshToken, options } from "./user.controller";
-import { ApiResponse } from "../utils/ApiResponse";
-import { IGetUserAuthInfoRequest } from "../middlewares/authMiddleWare";
+import AdminModel from "../models/admin.model";
+import { generateAccessTokenAndRefreshToken, options } from "../../../controllers/user.controller";
+import { ApiResponse } from "../../../utils/ApiResponse";
+import { IGetUserAuthInfoRequest } from "../../../middlewares/authMiddleWare";
 import { DecodedToken } from "@src/types/userType";
 import Jwt from "jsonwebtoken"
 

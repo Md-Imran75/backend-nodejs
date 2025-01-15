@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { adminLogin, logoutAdmin, refreshAccessTokenForAdmin } from "../controllers/admin.controller";
-import { verifyJwtForAdmin } from "../middlewares/authMiddleWare";
+import { verifyJwtForAdmin } from "../../../middlewares/authMiddleWare";
 
 const router = Router();
 

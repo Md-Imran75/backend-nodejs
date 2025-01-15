@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import UserModel from "@src/models/user.model";
 import { ObjectId } from "mongoose";
 import {Request} from "express"
-import Admin from "@src/models/admin.mode";
+import Admin from "@src/apps/adminDashboard/authService/models/admin.model";
 
 export interface IGetUserAuthInfoRequest extends Request {
   user?: any;

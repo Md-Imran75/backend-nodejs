@@ -1,7 +1,7 @@
 import mongoose, { Document, Schema, Model } from "mongoose";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { ApiError } from "@src/app/utils/ApiError";
+import { ApiError } from "@src/apps/utils/ApiError";
 
 
 export interface IUserAdmin extends Document {

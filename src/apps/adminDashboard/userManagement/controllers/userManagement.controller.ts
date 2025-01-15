@@ -1,11 +1,12 @@
 import { NextFunction, Request, Response } from "express";
-import { asyncHandle } from "../utils/asyncHandler";
-import { fetchUserQueryParameters } from "../../types/userType";
+import { asyncHandle } from "../../../utils/asyncHandler";
+import { fetchUserQueryParameters } from "../../../../types/userType";
 import UserModel from "@src/models/user.model";
-import { ApiResponse } from "../utils/ApiResponse";
+import { ApiResponse } from "../../../utils/ApiResponse";
 import { redisClient } from "@src/db/redis";
-import { ApiError } from "../utils/ApiError";
+import { ApiError } from "../../../utils/ApiError";
 import User from "@src/models/user.model";
+import { IGetUserAuthInfoRequest } from "@src/apps/middlewares/authMiddleWare";
 
 export const fetchAllUserByPaginationAndSortAndFilterAndSearch = asyncHandle(
   async (req: Request, res: Response, _next: NextFunction) => {
@@ -68,6 +69,14 @@ export const fetchAllUserByPaginationAndSortAndFilterAndSearch = asyncHandle(
 
       // Add sorting stage
       pipeline.push({ $sort: { [sortBy]: sortOrder } });
+
+      //add projection state to exlude password and refreshToken
+      pipeline.push({
+        $project: {
+          password: 0,
+          refreshToken: 0
+        }
+      })
 
       // Add pagination stages
       pipeline.push({ $skip: skip }, { $limit: Number(limit) });
@@ -166,61 +175,45 @@ export const createUser = asyncHandle(
 );
 
 export const updateUser = asyncHandle(
-  async (req: Request, res: Response, _next: NextFunction): Promise<void> => {
-    const { userName, fullName, email, password, phone, role, status, avatar} = req.body;
+  async (req: IGetUserAuthInfoRequest, res: Response, _next: NextFunction): Promise<void> => {
 
-    // Validate input
-    if (!userName || !fullName || !email || !password || !phone || !role || !status) {
+
+    const {fullName, email, password, phone, role, status, avatar, id, balance, userName} = req.body;
+    console.log(id)
+    const user = await User.findById(id);
+    if(!user){
       res
-        .status(400)
-        .json(new ApiError(400, "Please fill all the required fields"));
-      return; // Ensure the function exits
+      .status(404)
+      .json(
+        new ApiError(404, "user not found")
+      )
+      return;
     }
+    console.log(user)
+    const newBalance = user?.balance + balance;
+    console.log(newBalance);
 
-    // Check if user exists in cache
-    const cachedUser = await redisClient.get(`user:${email}`);
-    if (cachedUser) {
-      res
-        .status(400)
-        .json(new ApiError(400, "User already exists"));
-      return; // Ensure the function exits
-    }
+    // update new user
+    const newUser = await User.findByIdAndUpdate(id,{
+      userName : userName && userName,
+      fullName : fullName && fullName,
+      email: email && email,
+      password : password && password,
+      role: role && role,
+      phone : phone && phone,
+      status : status && status,
+      balance : balance && newBalance,
+      avatar : avatar && avatar
+    }, 
+  {
+    new: true
+  });
 
-    // Check if user exists in database
-    const existingUser = await User.findOne({
-      $or: [{ userName }, { email }, { phone }],
-    });
-    if (existingUser) {
-      // Cache the existing user
-      await redisClient.set(`user:${email}`, JSON.stringify(existingUser), {
-        EX: 600, // Cache expiry time in seconds (e.g., 10 minutes)
-      });
-      res
-        .status(400)
-        .json(new ApiError(400, "User already exists"));
-      return; // Ensure the function exits
-    }
 
-    // Create new user
-    const newUser = await User.create({
-      userName,
-      fullName,
-      email,
-      password,
-      role,
-      phone,
-      status
-    });
-
-    // Cache the new user
-    await redisClient.set(`user:${email}`, JSON.stringify(newUser), {
-      EX: 600, // Cache expiry time in seconds
-    });
-
-    // Respond to client
     res
       .status(201)
-      .json(new ApiResponse(201, {}, "User created successfully", {}));
+      .json(new ApiResponse(200, {} , "User updated successfully", {}));
   }
 );
+
 

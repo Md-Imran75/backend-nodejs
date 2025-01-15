@@ -31,10 +31,10 @@ app.use(express.urlencoded({
 
 
 //routes declaration
-import resetdb from './app/routes/resetdb.routes'
-import userRouter from './app/routes/user.routes';
-import adminAuthRouter from './app/routes/adminAuth.routes'
-import userManagement from './app/routes/userManagement.routes'
+import resetdb from './apps/routes/resetdb.routes'
+import userRouter from './apps/routes/user.routes';
+import adminAuthRouter from './apps/adminDashboard/authService/routes/adminAuth.routes'
+import userManagement from './apps/adminDashboard/userManagement/routes/userManagement.routes'
 
 app.use("/api/v1/admins-auth", adminAuthRouter);
 app.use("/api/v1/users", userRouter);

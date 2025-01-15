@@ -8,7 +8,7 @@ import { ObjectId } from 'mongoose';
 import { Request, Response, NextFunction } from 'express';
 import { IGetUserAuthInfoRequest } from '../middlewares/authMiddleWare';
 import Jwt from 'jsonwebtoken';
-import Admin from '@src/models/admin.mode';
+import Admin from '@src/apps/adminDashboard/authService/models/admin.model';
 
 
 

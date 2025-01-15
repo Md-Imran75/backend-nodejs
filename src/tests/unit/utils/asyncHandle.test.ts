@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { asyncHandle } from '../../../app/utils/asyncHandler'; 
+import { asyncHandle } from '../../../apps/utils/asyncHandler'; 
 
 describe('asyncHandle', () => {
   test('should call next() if the request handler resolves successfully', async () => {
