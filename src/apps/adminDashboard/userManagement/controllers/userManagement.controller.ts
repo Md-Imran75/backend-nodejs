@@ -8,6 +8,7 @@ import { ApiError } from "../../../utils/ApiError";
 import User from "@src/models/user.model";
 import { IGetUserAuthInfoRequest } from "@src/apps/middlewares/authMiddleWare";
 
+//fetch all user
 export const fetchAllUserByPaginationAndSortAndFilterAndSearch = asyncHandle(
   async (req: Request, res: Response, _next: NextFunction) => {
 
@@ -25,23 +26,23 @@ export const fetchAllUserByPaginationAndSortAndFilterAndSearch = asyncHandle(
     const sortOrder = sortDirection === "asc" ? 1 : -1;
 
     // Create a unique key for caching based on query parameters
-    const cacheKey = `users:${page}:${limit}:${sortBy}:${sortDirection}:${role || ""}:${status || ""}:${query || ""}`;
+    // const cacheKey = `users:${page}:${limit}:${sortBy}:${sortDirection}:${role || ""}:${status || ""}:${query || ""}`;
 
     // Check Redis cache
-    const cachedData = await redisClient.get(cacheKey);
-    if (cachedData) {
-      const { users, totalUsers } = JSON.parse(cachedData);
-      console.log("redis");
-      res.status(200).json(
-        new ApiResponse(200, users, "Users fetched successfully (cached)", {
-          totalUsers,
-          limit,
-          totalPages: Math.ceil(totalUsers / limit),
-          currentPage: Number(page),
-        })
+    // const cachedData = await redisClient.get(cacheKey);
+    // if (cachedData) {
+    //   const { users, totalUsers } = JSON.parse(cachedData);
+    //   console.log("redis");
+    //   res.status(200).json(
+    //     new ApiResponse(200, users, "Users fetched successfully (cached)", {
+    //       totalUsers,
+    //       limit,
+    //       totalPages: Math.ceil(totalUsers / limit),
+    //       currentPage: Number(page),
+    //     })
 
-      )
-    } else {
+    //   )
+    // } else {
       // Build aggregation pipeline
       const pipeline: any[] = [];
       console.log("controller");
@@ -96,11 +97,11 @@ export const fetchAllUserByPaginationAndSortAndFilterAndSearch = asyncHandle(
       const totalUsers = totalUsersResult[0]?.totalUsers || 0;
 
       // Cache the result in Redis for a specified duration (e.g., 10 minutes)
-      await redisClient.set(
-        cacheKey,
-        JSON.stringify({ users, totalUsers }),
-        { EX: 60 }
-      );
+      // await redisClient.set(
+      //   cacheKey,
+      //   JSON.stringify({ users, totalUsers }),
+      //   { EX: 60 }
+      // );
 
       // Return response
       res.status(200).json(
@@ -112,9 +113,10 @@ export const fetchAllUserByPaginationAndSortAndFilterAndSearch = asyncHandle(
         })
       );
     }
-  }
+  // }
 )
 
+//create user
 export const createUser = asyncHandle(
   async (req: Request, res: Response, _next: NextFunction): Promise<void> => {
     const { userName, fullName, email, password, phone, role, status } = req.body;
@@ -128,13 +130,13 @@ export const createUser = asyncHandle(
     }
 
     // Check if user exists in cache
-    const cachedUser = await redisClient.get(`user:${email}`);
-    if (cachedUser) {
-      res
-        .status(400)
-        .json(new ApiError(400, "User already exists"));
-      return; // Ensure the function exits
-    }
+    // const cachedUser = await redisClient.get(`user:${email}`);
+    // if (cachedUser) {
+    //   res
+    //     .status(400)
+    //     .json(new ApiError(400, "User already exists"));
+    //   return; // Ensure the function exits
+    // }
 
     // Check if user exists in database
     const existingUser = await User.findOne({
@@ -142,9 +144,9 @@ export const createUser = asyncHandle(
     });
     if (existingUser) {
       // Cache the existing user
-      await redisClient.set(`user:${email}`, JSON.stringify(existingUser), {
-        EX: 600, // Cache expiry time in seconds (e.g., 10 minutes)
-      });
+      // await redisClient.set(`user:${email}`, JSON.stringify(existingUser), {
+      //   EX: 600, // Cache expiry time in seconds (e.g., 10 minutes)
+      // });
       res
         .status(400)
         .json(new ApiError(400, "User already exists"));
@@ -163,9 +165,9 @@ export const createUser = asyncHandle(
     });
 
     // Cache the new user
-    await redisClient.set(`user:${email}`, JSON.stringify(newUser), {
-      EX: 600, // Cache expiry time in seconds
-    });
+    // await redisClient.set(`user:${email}`, JSON.stringify(newUser), {
+    //   EX: 600, // Cache expiry time in seconds
+    // });
 
     // Respond to client
     res
@@ -174,6 +176,7 @@ export const createUser = asyncHandle(
   }
 );
 
+//update user
 export const updateUser = asyncHandle(
   async (req: IGetUserAuthInfoRequest, res: Response, _next: NextFunction): Promise<void> => {
 
@@ -215,5 +218,39 @@ export const updateUser = asyncHandle(
       .json(new ApiResponse(200, {} , "User updated successfully", {}));
   }
 );
+
+//view user
+export const viewUserById = asyncHandle(
+  async(req: IGetUserAuthInfoRequest, res: Response, _next: NextFunction) : Promise<void> => {
+      const {id} = req.query;
+  
+      if(!id){
+         res
+         .status(400)
+         .json(
+          new ApiError(400, "User Id required")
+         )
+         return;
+      }
+
+      const user = await User.findById(id).select("-password -refreshToken");
+      
+      if(!user){
+        res
+        .status(404)
+        .json(
+          new ApiError(404, "User not found ")
+        )
+        return;
+      }
+
+      res
+      .status(200)
+      .json(
+        new ApiResponse(200, user, "User find successfully", {})
+      )
+
+  }
+)
 
 

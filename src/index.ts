@@ -13,7 +13,7 @@ connectDB()
    app.listen(process.env.PORT, () => {
     console.log(`server is listening form port ${process.env.PORT}`);
    })
-   connectRedis();
+//    connectRedis();
 })
 .catch((error) => {
     console.log(error);
